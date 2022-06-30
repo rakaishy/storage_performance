@@ -1,60 +1,30 @@
 import requests
 import json
-import datetime
+from requests.structures import CaseInsensitiveDict
 
-url = 'https://eu5.api.enterprisedata.slb.com/api/storage/v2/records'
-dataPartitionId = 'sandbox-weu-des-prod-testing-e'
+url = "https://eu5.api.enterprisedata.slb.com/api/storage/v2/records"
 
-body = [
-    {
-        "kind": "BASE_KIND",
-        "version": 1562066009929332,
-        "acl": {
-            "owners": ['data.default.viewers@' + dataPartitionId + '.enterprisedata.slb.com'],
-            "viewers": ['data.default.viewers@' + dataPartitionId + '.enterprisedata.slb.com']
-        },
-        "legal": {
-            "legaltags": [dataPartitionId + '-default-legal'],
-            "otherRelevantDataCountries": ['US'],
-            "status": 'compliant'
-        },
-        "createTime": datetime.datetime.now(),
-        "createUser": 'aguerrero25@slb.com',
-        "modifyTime": datetime.datetime.now(),
-        "modifyUser": 'aguerrero25@slb.com',
-        "ancestry": {
-            "parents": []
-        },
-        "meta": [],
-        "data": {
-            "Name": 'OSDU Performance Collection',
-            "Description": 'Performance related collection',
-            "CreationDateTime": '2020-02-13T09:13:15.55Z',
-            "Tags": ['Example Tags'],
-            "SubmitterName": 'Example SubmitterName',
-            "BusinessActivities": ['Example BusinessActivities'],
-            "AuthorIDs": ['Example AuthorIDs'],
-            "MemberIDs": [],
-            "PurposeID": 'namespace:reference-data--CollectionPurpose:Project:',
-            "ParentCollectionID":
-                'namespace:work-product-component--PersistedCollection:PersistedCollection-911bb71f-06ab-4deb-8e68-b8c9229dc76b:',
-            "HomogeneousMemberKind": 'osdu:wks:work-product-component--SeismicHorizon',
-            "Author": 'Example Author',
-            "ExtensionProperties": {}
-        }
-    }
-]
+headers = CaseInsensitiveDict()
+headers["accept"] = "application/json"
+headers["data-partition-id"] = "sandbox-weu-des-prod-testing-e"
+headers[
+    "Authorization"] = "Bearer eyJ0eXAiOiAiSldUIiwgImFsZyI6ICJSUzI1NiIsICJraWQiOiAiTVRZMU5qVTFORFF3T0E9PSJ9.eyJpYXQiOiAxNjU2NTk0NTMwLCAiZXhwIjogMTY1NjU5ODEzMCwgImlzcyI6ICJodHRwczovL2NzaS5zbGIuY29tL3YyIiwgImF1ZCI6IFsiZGlnaXRhbHJlc3ZjLWRpZ2l0YWxyZS5zbGJzZXJ2aWNlLmNvbSIsICI0NTU1NzE3NmMwMTU0Mzk5OTljZDI0NTQ2MTM1NGU5NiIsICJjY20tdXNlci1jb250ZXh0LWNmc3NlcnZpY2Uuc2xic2VydmljZS5jb20iLCAiNzY2MDVmYTQ1MWM3NGU0YWI0M2FjNjY0MTFjMDhmMDUiLCAic2VydmljZS1pZGVudGl0eS1leHBsb3JlcGxhbi5zbGJzZXJ2aWNlLmNvbSIsICJkYXRhLWFuYWx5dGljcy1jZHMuc2xic2VydmljZS5jb20iLCAiYTYyNjMyODMxMzk0NDYwMWJhMjZjZDFmZmJhZjZhNTMiLCAiZWRhMzM4ZDhhNDgyNDNmNzhhNWIzMTI2YTk2ODQxMzMiLCAiZGU2OTFiNDhlNjQ2NGRhZDk3MjQxNDE0MzRjMzg5MGIiLCAiOTYzZjJjYzY5MTVlNDc5ZmEwZmNiNzNlYzJlYzkwZTciLCAic2VydmljZS1lZXN5LnNsYnNlcnZpY2UuY29tIiwgImRlLXNhdXRoLXYyLXNjb3BlLXNlcnZpY2UtZGF0YWxha2Uuc2xic2VydmljZS5jb20iLCAicHJvZC1uYW0tc2VydmljZXMtZmRwbGFuLnNsYnNlcnZpY2UuY29tIiwgInByb2QtZXUtc2VydmljZXMtZmRwbGFuLnNsYnNlcnZpY2UuY29tIiwgInNlcnZpY2UtcGV0cmVsc3RvcmFnZS5zbGJzZXJ2aWNlLmNvbSIsICIzNTIyY2U0OTQyZTQ0ZGRkOTM3OThlNTQ5ZDgzZjcxMyIsICIxNDFlZWNkM2NmNDk0YTdiYThlNTY0NTczODI3YzFhOCIsICIxYzMxMzliNjY0MTg0YTA4YTI5MWVjMmUxOWY5YTlhMyIsICJmd2stZHJpbGxwbGFuLnNsYnNlcnZpY2UuY29tIiwgInByb2R1Y3Rpb24tZGF0YS1mb3VuZGF0aW9uLXByb2QtZ2xvYmFsLWNsaWVudC1pZCIsICJlZGYxN2QxZjhjYzM0NjFkOGJhM2YxYTk4Y2U3YmUxYiJdLCAic3ViIjogImFndWVycmVybzI1QHNsYi5jb20iLCAiZW1haWwiOiAiYWd1ZXJyZXJvMjVAc2xiLmNvbSIsICJkZXNpZCI6ICJhZ3VlcnJlcm8yNS1zbGItY29tLTkyYmUwYjQwQGRlc2lkLmRlbGZpLnNsYi5jb20iLCAic3ViaWQiOiAieW43RkN4SUdXR2g1MGtsbVowZXMwckFnTzJZWjgyaVhFSlJrT3BHUlplOCIsICJhenAiOiAibGl2ZS1kZXZwb3J0YWwtYXBpZ2VlZGV2cG9ydGFsLnNsYmFwcC5jb20iLCAianRpIjogImF0LmZlZjc4MjNkODhjMjQwNmQ5NDc2YzEwNDFkNTg0N2YwIiwgIm9pZCI6ICIxOWRlZmY1Ny1jMjZhLTQ2ZDAtOTYwZS1kNjQ2NDVhZDU2OTgiLCAidGlkIjogIjQxZmYyNmRjLTI1MGYtNGIxMy04OTgxLTczOWJlODYxMGMyMSJ9.U1qoXOso3hitpVAmechG8jCe-d-rdM5ICEpDm9tS1JNAlw_ej8htxHvf8ZJ-qUQ7_FeEHz85nJ1APdXzRu9aOVY7QdvZgTvg1_tfjQz7xfp64r2dInv_Zfd4a3BxxvqOj2QLU1CBsYCUd0glLj1Tcn1xLBU5fmsFd3dXL6qgCY8rTO5TJgXApfrd8Xp6alA3gTGw07nxyiflyFtGSV0JEF4yL2wufbak1N-hRUAw8ukW7NY7M0BYC2mCBzbcNbPLWMR82KPFqhINM0S-CVTdm68YjZbxmQ1fsBYydDA5kE2eJkJ1MW7MmkCKp-891jvR1cAYSes1nDpLcmELYmOsZg"
+headers["Content-Type"] = "application/json"
 
-with open('resources/collections.json') as collections:
-    collections_data = json.load(collections);
+with open('resources/base_collections_request') as base_collections:
+    collections_no_data = json.load(base_collections)
+
+with open('resources/updated_collections_request.json') as filled_collections:
+    collections_with_data = json.load(filled_collections)
 
 
-def create_request(data_partition_id):
-    create = requests.put(url, data=body)
+def create_request():
+    create = requests.put(url, headers=headers, data=collections_no_data)
+    print(create.json())  # no output
 
 
-def update_request(data_partition_id):
-    update = requests.put()
+def update_request():
+    update = requests.put(url, headers=headers, data=collections_with_data)
 
 
-print(collections_data)
+create_request
