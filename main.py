@@ -29,10 +29,26 @@ async def update_request():
     return json.loads(update.text)
 
 
-create_log = asyncio.run(create_request())
+async def get_request(record_id):
+    collection = requests.get(url + '/' + record_id, headers=headers)
+    return json.loads(collection.text)
 
-collections_with_data[0]['id'] = create_log['recordIds'][0]
+
+async def delete_request(record_id):
+    collection = requests.delete(url + '/' + record_id, headers=headers)
+    return json.loads(collection.text)
+
+
+create_log = asyncio.run(create_request())
+record_created = create_log['recordIds'][0]
+
+# uses new generated id to update the collection
+collections_with_data[0]['id'] = record_created
 update_log = asyncio.run(update_request())
+
+# get the updated collection to verify is the update is already published
+collection_log = asyncio.run(get_request(record_created))
 
 print(create_log)
 print(update_log)
+print(collection_log)
